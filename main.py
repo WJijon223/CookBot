@@ -1,7 +1,7 @@
 from api import recipe_api
 
 def main_menu():
-    print("Welcome to CookBot!")
+    print("\nWelcome to CookBot!")
     print("1. Add ingredients")
     print("2. View ingredients")
     print("3. Search for a recipe")
@@ -9,11 +9,11 @@ def main_menu():
     print("5. View saved recipes")
     print("6. Exit\n")
 
-    user_choice = int(input("Please select an option (1-5): "))
-    while user_choice < 1 or user_choice > 5:
-        print("Invalid choice. Please select a number between 1 and 5.")
-        user_choice = int(input("Please select an option (1-5): "))
-    return user_choice
+    user_choice = input("Please select an option (1-6): ")
+    while (not user_choice.isdigit()) or (int(user_choice) < 1 or int(user_choice)) > 6:
+        print("Invalid choice. Please select a number between 1 and 6.")
+        user_choice = input("Please select an option (1-6): ")
+    return int(user_choice)
 
 def ingredients_menu(ingredients_list):
     if len(ingredients_list) > 0:
@@ -28,8 +28,12 @@ def ingredients_menu(ingredients_list):
             ingredients_list.clear()
             print("All ingredients cleared.")
 
-    num_ingredients = int(input("Enter number of ingredients: "))
-    for _ in range(num_ingredients):
+    num_ingredients = input("Enter number of ingredients: ").strip()
+    while not num_ingredients.isdigit() or int(num_ingredients) <= 0:
+        print("Invalid input. Please enter a positive integer.")
+        num_ingredients = input("Enter number of ingredients: ").strip()
+
+    for _ in range(int(num_ingredients)):
         ingredient = input("Enter ingredient: ")
         ingredients_list.append(ingredient)
 
@@ -45,6 +49,10 @@ def display_ingredients(ingredients_list):
     print("\nReturning to main menu...\n")
 
 def search_recipe(ingredients_list, data):
+    if not ingredients_list:
+        print("No ingredients added yet. Please add ingredients first.")
+        return
+    
     if data:
         print("You already have a recipe search in progess. Would you like to learn more about it or start a new search?")
         choice = input("Please enter your choice (1 to learn more, 2 to start a new search): ").strip().lower()
@@ -60,23 +68,27 @@ def search_recipe(ingredients_list, data):
         data = recipe_api.get_response_by_ingredients(ingredients_list)
     
     dish_names = recipe_api.get_dish_names(data)
+    if not dish_names:
+        print("No recipes found for the given ingredients. Please try adding different ingredients.")
+        return
     recipe_api.print_dish_names(dish_names)
 
     choosing = True
     while choosing:
-        user_choice = input("Which dish would you like to learn more about? Please enter the name: ").strip()
-        index = recipe_api.recipe_index_by_name(data, user_choice)
-
-        while index == -1:
-            print("Dish not found. Please try again.")
-            user_choice = input("Which dish would you like to learn more about? Please enter the name: ").strip()
-            index = recipe_api.recipe_index_by_name(data, user_choice)
+        index = input("Which dish would you like to learn more about? Please enter the number (0 to Return to Main Menu): ").strip()
+        while (not index.isdigit()) and (int(index) < 0 or int(index) > len(index)):
+            print(f"Invalid choice. Please enter a number between 1 and {len(dish_names)}.")
+            index = input("Which dish would you like to learn more about? Please enter the number (0 to Return to Main Menu): ").strip()
+        if index == '0':
+            print("Returning to main menu...\n")
+            return
+        index = int(index) - 1
 
         if data[index]["missedIngredients"]:
-            print("You are missing the following ingredients for this recipe:")
+            print(f"You are missing the following ingredients for {data[index]['title']}:")
             recipe_api.print_missing_ingredients(data, index)
         
-        keep_choosing = input("Would you like to choose another dish? (yes/no): ").strip().lower()
+        keep_choosing = input("Would you like to learn about another dish?? (yes/no): ").strip().lower()
         if keep_choosing != 'yes':
             choosing = False
             print("Returning to main menu...\n")

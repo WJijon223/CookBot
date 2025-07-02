@@ -12,6 +12,10 @@ def get_response_by_ingredients(items):
         "ignorePantry" : True
     }
 
+    if not params["apiKey"]:
+        print("API key is not set. Please set the SPOONACULAR_API_KEY environment variable and restart program.")
+        return
+
     response = requests.get(url, params=params)
     return response.json()
 
