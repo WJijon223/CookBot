@@ -43,7 +43,6 @@ You can get a free Spoonacular API key from: https://spoonacular.com/food-api
 
 Run the application with:
 
-```bash
 python CookBot/main.py
 ```
 
